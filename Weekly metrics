@@ -1,0 +1,42 @@
+# Define Variables
+$resourceGroup = RG
+$appService = "Justin-Rainey-Portfolio"
+$subscriptionId = SUB_ID
+
+# Confirmed-supported metrics for your App Service
+$metricsToQuery = @(
+    "CpuTime",
+    "Requests",
+    "MemoryWorkingSet",
+    "AverageResponseTime",
+    "HealthCheckStatus"
+)
+
+# Get metrics for the past 7 days, aggregated hourly
+$metrics = Get-AzMetric -ResourceId "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/sites/$appService" `
+            -MetricName $metricsToQuery `
+            -TimeGrain (New-TimeSpan -Hours 1) `
+            -StartTime (Get-Date).AddDays(-7) `
+            -EndTime (Get-Date)
+
+# Format and display output for each metric
+foreach ($metric in $metrics) {
+    Write-Host "Metric: $($metric.Name.Value)" -ForegroundColor Cyan
+
+    $dataPoints = @()
+
+    foreach ($timeseries in $metric.Timeseries) {
+        foreach ($data in $timeseries.Data) {
+            $dataPoints += [PSCustomObject]@{
+                TimeStamp = $data.TimeStamp
+                Average   = $data.Average
+                Total     = $data.Total
+                Minimum   = $data.Minimum
+                Maximum   = $data.Maximum
+            }
+        }
+    }
+
+    $dataPoints | Format-Table -AutoSize
+    Write-Host "`n"
+}
