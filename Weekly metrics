@@ -8,8 +8,7 @@ $metricsToQuery = @(
     "CpuTime",
     "Requests",
     "MemoryWorkingSet",
-    "AverageResponseTime",
-    "HealthCheckStatus"
+    "AverageResponseTime"
 )
 
 # Get metrics for the past 7 days, aggregated hourly
